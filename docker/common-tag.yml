@@ -23,7 +23,7 @@ runs:
     - name: Docker login
       shell: bash
       id: login
-      run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }} ${{ inputs.registry }}
+      run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD ${{ inputs.registry }}
     
     - name: Docker manifest create
       shell: bash
