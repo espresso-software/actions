@@ -11,6 +11,10 @@ inputs:
     description: 'Push latest tag'
     required: false
     default: 'false'
+  custom_latest:
+    description: 'Custom latest tag'
+    required: false
+    default: 'latest'
   use_cache:
     description: 'Use cache'
     required: false
@@ -60,8 +64,8 @@ runs:
         docker push ${{ inputs.repository }}:${{ inputs.tag }}
 
         if [ "${{ inputs.latest }}" = "true" ]; then
-          docker tag ${{ inputs.repository }}:${{ inputs.tag }} ${{ inputs.repository }}:latest
-          docker push ${{ inputs.repository }}:latest
+          docker tag ${{ inputs.repository }}:${{ inputs.tag }} ${{ inputs.repository }}:${{ inputs.custom_latest }}
+          docker push ${{ inputs.repository }}:${{ inputs.custom_latest }}
         fi
     
     - name: Docker image cleanup
@@ -69,7 +73,7 @@ runs:
       if: steps.build.conclusion == 'success'
       run: |
         docker rmi ${{ inputs.repository }}:${{ inputs.tag }}
-        docker rmi ${{ inputs.repository }}:latest || true
+        docker rmi ${{ inputs.repository }}:${{ inputs.custom_latest }} || true
     
     - name: Docker logout
       shell: bash
