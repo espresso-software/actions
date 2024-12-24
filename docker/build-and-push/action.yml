@@ -55,7 +55,7 @@ runs:
           --tag ${{ inputs.registry }}/${{ inputs.repository }}:${{ inputs.tag }} \
           --file ${{ inputs.dockerfile }} \
           ${{ inputs.build_args }} \
-          ${{ no_cache }} \
+          $no_cache \
           .
 
     - name: Docker push
