@@ -1,10 +1,6 @@
 name: Docker Build
 description: Build Docker Image
 inputs:
-  registry:
-    description: Docker Registry
-    required: false
-    default: 'hub.docker.com'
   repository:
     description: Docker Repository
     required: true
@@ -37,7 +33,7 @@ runs:
     - name: Docker login
       shell: bash
       id: login
-      run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD ${{ inputs.registry }}
+      run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
     
     - name: Docker build
       id: build
@@ -52,7 +48,7 @@ runs:
         cd ${{ inputs.build_dir }}
 
         docker build \
-          --tag ${{ inputs.registry }}/${{ inputs.repository }}:${{ inputs.tag }} \
+          --tag ${{ inputs.repository }}:${{ inputs.tag }} \
           --file ${{ inputs.dockerfile }} \
           ${{ inputs.build_args }} \
           $no_cache \
@@ -61,22 +57,22 @@ runs:
     - name: Docker push
       shell: bash
       run: |
-        docker push ${{ inputs.registry }}/${{ inputs.repository }}:${{ inputs.tag }}
+        docker push ${{ inputs.repository }}:${{ inputs.tag }}
 
         if [ "${{ inputs.latest }}" = "true" ]; then
-          docker tag ${{ inputs.registry }}/${{ inputs.repository }}:${{ inputs.tag }} ${{ inputs.registry }}/${{ inputs.repository }}:latest
-          docker push ${{ inputs.registry }}/${{ inputs.repository }}:latest
+          docker tag ${{ inputs.repository }}:${{ inputs.tag }} ${{ inputs.repository }}:latest
+          docker push ${{ inputs.repository }}:latest
         fi
     
     - name: Docker image cleanup
       shell: bash
       if: steps.build.conclusion == 'success'
       run: |
-        docker rmi ${{ inputs.registry }}/${{ inputs.repository }}:${{ inputs.tag }}
-        docker rmi ${{ inputs.registry }}/${{ inputs.repository }}:latest || true
+        docker rmi ${{ inputs.repository }}:${{ inputs.tag }}
+        docker rmi ${{ inputs.repository }}:latest || true
     
     - name: Docker logout
       shell: bash
       if: steps.login.conclusion == 'success'
-      run: docker logout ${{ inputs.registry }}
+      run: docker logout
   

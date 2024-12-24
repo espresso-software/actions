@@ -1,10 +1,6 @@
 name: Docker Image Promote
 description: Promote Docker Image
 inputs:
-  registry:
-    description: Docker Registry
-    required: false
-    default: 'hub.docker.com'
   repository:
     description: Docker Repository
     required: true
@@ -23,29 +19,29 @@ runs:
     - name: Docker login
       shell: bash
       id: login
-      run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD ${{ inputs.registry }}
+      run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
     
     - name: Docker manifest create
       shell: bash
       id: manifest
       run: |
-        docker manifest create ${{ inputs.registry }}/${{ inputs.repository }}:${{ inputs.tag }} \
-          ${{ inputs.registry }}/${{ inputs.repository }}:${{ inputs.x64_tag }} \
-          ${{ inputs.registry }}/${{ inputs.repository }}:${{ inputs.arm64_tag }}
+        docker manifest create ${{ inputs.repository }}:${{ inputs.tag }} \
+          ${{ inputs.repository }}:${{ inputs.x64_tag }} \
+          ${{ inputs.repository }}:${{ inputs.arm64_tag }}
         
-        docker manifest annotate ${{ inputs.registry }}/${{ inputs.repository }}:${{ inputs.tag }} \
-          ${{ inputs.registry }}/${{ inputs.repository }}:${{ inputs.x64_tag }} \
+        docker manifest annotate ${{ inputs.repository }}:${{ inputs.tag }} \
+          ${{ inputs.repository }}:${{ inputs.x64_tag }} \
           --os linux \
           --arch amd64
         
-        docker manifest annotate ${{ inputs.registry }}/${{ inputs.repository }}:${{ inputs.tag }} \
-          ${{ inputs.registry }}/${{ inputs.repository }}:${{ inputs.arm64_tag }} \
+        docker manifest annotate ${{ inputs.repository }}:${{ inputs.tag }} \
+          ${{ inputs.repository }}:${{ inputs.arm64_tag }} \
           --os linux \
           --arch arm
 
-        docker manifest push ${{ inputs.registry }}/${{ inputs.repository }}:${{ inputs.tag }}
+        docker manifest push ${{ inputs.repository }}:${{ inputs.tag }}
     
     - name: Docker logout
       shell: bash
       if: steps.login.conclusion == 'success'
-      run: docker logout ${{ inputs.registry }}
+      run: docker logout
