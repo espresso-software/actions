@@ -13,4 +13,4 @@ runs:
     - name: Download file
       shell: bash
       run: |
-        curl -L -o ${{ inputs.destination }} ${{ inputs.url }}
+        curl -LsS -o ${{ inputs.destination }} ${{ inputs.url }}
