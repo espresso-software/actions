@@ -5,6 +5,9 @@ inputs:
     description: 'Version file'
     required: false
     default: 'version.json'
+outputs:
+  version:
+    description: 'Version'
 runs:
   using: 'composite'
   steps:
