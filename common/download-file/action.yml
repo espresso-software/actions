@@ -1,0 +1,16 @@
+name: Download file
+description: Download file from URL
+inputs:
+  url:
+    description: URL to download file from
+    required: true
+  destination:
+    description: Destination path to save the downloaded file
+    required: true
+runs:
+  using: 'composite'
+  steps:
+    - name: Download file
+      shell: bash
+      run: |
+        curl -L -o ${{ inputs.destination }} ${{ inputs.url }}
