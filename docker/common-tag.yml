@@ -1,0 +1,51 @@
+name: Docker Image Promote
+description: Promote Docker Image
+inputs:
+  registry:
+    description: Docker Registry
+    required: false
+    default: 'hub.docker.com'
+  repository:
+    description: Docker Repository
+    required: true
+  tag:
+    description: Tag to publish
+    required: true
+  x64_tag:
+    description: Tag published for x64
+    required: true
+  arm64_tag:
+    description: Tag published for arm64
+    required: true
+runs:
+  using: 'composite'
+  steps:
+    - name: Docker login
+      shell: bash
+      id: login
+      run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }} ${{ inputs.registry }}
+    
+    - name: Docker manifest create
+      shell: bash
+      id: manifest
+      run: |
+        docker manifest create ${{ inputs.registry }}/${{ inputs.repository }}:${{ inputs.tag }} \
+          ${{ inputs.registry }}/${{ inputs.repository }}:${{ inputs.x64_tag }} \
+          ${{ inputs.registry }}/${{ inputs.repository }}:${{ inputs.arm64_tag }}
+        
+        docker manifest annotate ${{ inputs.registry }}/${{ inputs.repository }}:${{ inputs.tag }} \
+          ${{ inputs.registry }}/${{ inputs.repository }}:${{ inputs.x64_tag }} \
+          --os linux \
+          --arch amd64
+        
+        docker manifest annotate ${{ inputs.registry }}/${{ inputs.repository }}:${{ inputs.tag }} \
+          ${{ inputs.registry }}/${{ inputs.repository }}:${{ inputs.arm64_tag }} \
+          --os linux \
+          --arch arm
+
+        docker manifest push ${{ inputs.registry }}/${{ inputs.repository }}:${{ inputs.tag }}
+    
+    - name: Docker logout
+      shell: bash
+      if: steps.login.conclusion == 'success'
+      run: docker logout ${{ inputs.registry }}
