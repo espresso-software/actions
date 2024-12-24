@@ -1,0 +1,26 @@
+name: Get version
+description: Get the version of the current repository
+inputs:
+  version_file:
+    description: 'Version file'
+    required: false
+    default: 'version.json'
+runs:
+  using: 'composite'
+  steps:
+    - name: Get release version
+      if: github.ref == 'refs/heads/main' || (github.event_name == 'pull_request' && github.base_ref == 'main')
+      shell: bash
+      run: |
+        echo "version=$(jq -r .version ${{ inputs.version_file }})-${{ github.run_number }}" > $GITHUB_OUTPUT
+    - name: Get feature version
+      if: startsWith(github.ref, 'refs/heads/feature/')
+      shell: bash
+      run: |
+        echo "version=$(jq -r .version ${{ inputs.version_file }}-FEA.${{ github.run_number }})" > $GITHUB_OUTPUT
+    - name: Get bugfix version
+      if: startsWith(github.ref, 'refs/heads/bugfix/')
+      shell: bash
+      run: |
+        echo "version=$(jq -r .version ${{ inputs.version_file }}-BUG.${{ github.run_number }})" > $GITHUB_OUTPUT
+    
