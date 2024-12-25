@@ -1,13 +1,10 @@
 name: Get version
-description: Get the version of the current repository
+description: Populates the IMAGE_VERSION environment variable with the version of the image being built
 inputs:
   version_file:
     description: 'Version file'
     required: false
     default: 'version.json'
-outputs:
-  version:
-    description: 'Version'
 runs:
   using: 'composite'
   steps:
@@ -15,10 +12,10 @@ runs:
       if: github.ref == 'refs/heads/main' || (github.event_name == 'pull_request' && github.base_ref == 'refs/heads/main')
       shell: bash
       run: |
-        echo "version=$(jq -r .version ${{ inputs.version_file }})-${{ github.run_number }}" >> $GITHUB_OUTPUT
+        echo "IMAGE_VERSION=$(jq -r .version ${{ inputs.version_file }})-${{ github.run_number }}" >> $GITHUB_ENV
     - name: Get feature version
       if: github.ref != 'refs/heads/main' && github.event_name != 'pull_request'
       shell: bash
       run: |
-        echo "version=DEV.${{ github.run_number }}" >> $GITHUB_OUTPUT
+        echo "IMAGE_VERSION=DEV.${{ github.run_number }}" >> $GITHUB_ENV
     
