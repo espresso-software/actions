@@ -1,0 +1,86 @@
+name: Docker Build
+description: Build Docker Image
+inputs:
+  repository:
+    description: Docker Repository
+    required: true
+  tag:
+    description: Docker Tag
+    required: true
+  latest:
+    description: 'Push latest tag'
+    required: false
+    default: 'false'
+  custom_latest:
+    description: 'Custom latest tag'
+    required: false
+    default: 'latest'
+  use_cache:
+    description: 'Use cache'
+    required: false
+    default: 'false'
+  build_args:
+    description: 'Build arguments'
+    required: false
+    default: ''
+  dockerfile:
+    description: 'Dockerfile'
+    required: false
+    default: 'Dockerfile'
+  build_dir:
+    description: 'Build directory'
+    required: false
+    default: '.'
+  skip_cleanup:
+    description: 'Skip cleanup'
+    required: false
+    default: 'false'
+runs:
+  using: 'composite'
+  steps:
+    - name: Docker login
+      shell: bash
+      id: login
+      run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+    
+    - name: Docker build
+      id: build
+      shell: bash
+      run: |
+        no_cache=''
+        
+        if [ "${{ inputs.use_cache }}" = "false" ]; then
+          no_cache='--no-cache'
+        fi
+
+        cd ${{ inputs.build_dir }}
+
+        docker build \
+          --tag ${{ inputs.repository }}:${{ inputs.tag }} \
+          --file ${{ inputs.dockerfile }} \
+          ${{ inputs.build_args }} \
+          $no_cache \
+          .
+
+    - name: Docker push
+      shell: bash
+      run: |
+        docker push ${{ inputs.repository }}:${{ inputs.tag }}
+
+        if [ "${{ inputs.latest }}" = "true" ]; then
+          docker tag ${{ inputs.repository }}:${{ inputs.tag }} ${{ inputs.repository }}:${{ inputs.custom_latest }}
+          docker push ${{ inputs.repository }}:${{ inputs.custom_latest }}
+        fi
+    
+    - name: Docker image cleanup
+      shell: bash
+      if: steps.build.conclusion == 'success' || inputs.skip_cleanup == 'true'
+      run: |
+        docker rmi ${{ inputs.repository }}:${{ inputs.tag }}
+        docker rmi ${{ inputs.repository }}:${{ inputs.custom_latest }} || true
+    
+    - name: Docker logout
+      shell: bash
+      if: steps.login.conclusion == 'success'
+      run: docker logout
+  

@@ -1,0 +1,63 @@
+name: Docker Image Promote
+description: Promote Docker Image
+inputs:
+  repository:
+    description: Docker Repository
+    required: true
+  old_tag:
+    description: Published tag
+    required: true
+  promote_tag:
+    description: Tag to publish
+    required: true
+  promote_latest:
+    description: 'Push latest tag'
+    required: false
+    default: 'false'
+  promote_custom_latest:
+    description: 'Custom latest tag'
+    required: false
+    default: 'latest'
+runs:
+  using: 'composite'
+  steps:
+    - name: Docker login
+      shell: bash
+      id: login
+      run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+    
+    - name: Docker pull
+      id: pull
+      shell: bash
+      run: |
+        docker pull ${{ inputs.repository }}:${{ inputs.old_tag }}
+
+    - name: Docker tag
+      shell: bash
+      id: tag
+      run: |
+        docker tag ${{ inputs.repository }}:${{ inputs.old_tag }} ${{ inputs.repository }}:${{ inputs.promote_tag }}
+        docker push ${{ inputs.repository }}:${{ inputs.promote_tag }}
+        
+        if [ "${{ inputs.promote_latest }}" = "true" ]; then
+          docker tag ${{ inputs.repository }}:${{ inputs.old_tag }} ${{ inputs.repository }}:${{ inputs.promote_custom_latest }}
+          docker push ${{ inputs.repository }}:${{ inputs.promote_custom_latest }}
+        fi
+
+    - name: Docker remove old tag
+      shell: bash
+      if: steps.pull.conclusion == 'success'
+      run: |
+        docker rmi ${{ inputs.repository }}:${{ inputs.old_tag }}
+    
+    - name: Docker remove new tags
+      shell: bash
+      if: steps.tag.conclusion == 'success'
+      run: |
+        docker rmi ${{ inputs.repository }}:${{ inputs.promote_tag }} || true
+        docker rmi ${{ inputs.repository }}:${{ inputs.promote_custom_latest }} || true
+    
+    - name: Docker logout
+      shell: bash
+      if: steps.login.conclusion == 'success'
+      run: docker logout

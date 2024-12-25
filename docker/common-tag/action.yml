@@ -1,0 +1,49 @@
+name: Docker Image Promote
+description: Promote Docker Image
+inputs:
+  repository:
+    description: Docker Repository
+    required: true
+  tag:
+    description: Tag to publish
+    required: true
+  x64_tag:
+    description: Tag published for x64
+    required: true
+  arm64_tag:
+    description: Tag published for arm64
+    required: true
+runs:
+  using: 'composite'
+  steps:
+    - name: Docker login
+      shell: bash
+      id: login
+      run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+    
+    - name: Docker manifest create
+      shell: bash
+      run: |
+        docker manifest create --amend ${{ inputs.repository }}:${{ inputs.tag }} \
+          ${{ inputs.repository }}:${{ inputs.x64_tag }} \
+          ${{ inputs.repository }}:${{ inputs.arm64_tag }}
+        
+        docker manifest annotate ${{ inputs.repository }}:${{ inputs.tag }} \
+          ${{ inputs.repository }}:${{ inputs.x64_tag }} --arch amd64
+        
+        docker manifest annotate ${{ inputs.repository }}:${{ inputs.tag }} \
+          ${{ inputs.repository }}:${{ inputs.arm64_tag }} --arch arm
+
+        docker manifest push ${{ inputs.repository }}:${{ inputs.tag }}
+
+    - name: Docker image remove
+      if: steps.pull.conclusion == 'success'
+      shell: bash
+      run: |
+        docker rmi ${{ inputs.repository }}:${{ inputs.x64_tag }}
+        docker rmi ${{ inputs.repository }}:${{ inputs.arm64_tag }}
+    
+    - name: Docker logout
+      shell: bash
+      if: steps.login.conclusion == 'success'
+      run: docker logout
