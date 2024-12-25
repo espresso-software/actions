@@ -28,18 +28,9 @@ runs:
         docker manifest create ${{ inputs.repository }}:${{ inputs.tag }} \
           ${{ inputs.repository }}:${{ inputs.x64_tag }} \
           ${{ inputs.repository }}:${{ inputs.arm64_tag }}
-        
-        docker manifest annotate ${{ inputs.repository }}:${{ inputs.tag }} \
-          ${{ inputs.repository }}:${{ inputs.x64_tag }} \
-          --os linux \
-          --arch amd64
-        
-        docker manifest annotate ${{ inputs.repository }}:${{ inputs.tag }} \
-          ${{ inputs.repository }}:${{ inputs.arm64_tag }} \
-          --os linux \
-          --arch arm
 
         docker manifest push ${{ inputs.repository }}:${{ inputs.tag }}
+
     
     - name: Docker logout
       shell: bash
