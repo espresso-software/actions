@@ -32,7 +32,7 @@ runs:
     - name: Docker manifest create
       shell: bash
       run: |
-        docker manifest create ${{ inputs.repository }}:${{ inputs.tag }} \
+        docker manifest create --amend ${{ inputs.repository }}:${{ inputs.tag }} \
           ${{ inputs.repository }}:${{ inputs.x64_tag }} \
           ${{ inputs.repository }}:${{ inputs.arm64_tag }}
         
