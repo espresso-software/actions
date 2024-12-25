@@ -37,9 +37,11 @@ runs:
       id: tag
       run: |
         docker tag ${{ inputs.repository }}:${{ inputs.old_tag }} ${{ inputs.repository }}:${{ inputs.promote_tag }}
+        docker push ${{ inputs.repository }}:${{ inputs.promote_tag }}
         
         if [ "${{ inputs.promote_latest }}" = "true" ]; then
           docker tag ${{ inputs.repository }}:${{ inputs.old_tag }} ${{ inputs.repository }}:${{ inputs.promote_custom_latest }}
+          docker push ${{ inputs.repository }}:${{ inputs.promote_custom_latest }}
         fi
 
     - name: Docker remove old tag
