@@ -20,10 +20,17 @@ runs:
       shell: bash
       id: login
       run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+
+    
+    - name: Docker image pull
+      id: pull
+      shell: bash
+      run: |
+        docker pull ${{ inputs.repository }}:${{ inputs.x64_tag }}
+        docker pull ${{ inputs.repository }}:${{ inputs.arm64_tag }}
     
     - name: Docker manifest create
       shell: bash
-      id: manifest
       run: |
         docker manifest create ${{ inputs.repository }}:${{ inputs.tag }} \
           ${{ inputs.repository }}:${{ inputs.x64_tag }} \
@@ -37,6 +44,12 @@ runs:
 
         docker manifest push ${{ inputs.repository }}:${{ inputs.tag }}
 
+    - name: Docker image remove
+      if: steps.pull.conclusion == 'success'
+      shell: bash
+      run: |
+        docker rmi ${{ inputs.repository }}:${{ inputs.x64_tag }}
+        docker rmi ${{ inputs.repository }}:${{ inputs.arm64_tag }}
     
     - name: Docker logout
       shell: bash
