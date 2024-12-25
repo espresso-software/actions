@@ -28,6 +28,12 @@ runs:
         docker manifest create ${{ inputs.repository }}:${{ inputs.tag }} \
           ${{ inputs.repository }}:${{ inputs.x64_tag }} \
           ${{ inputs.repository }}:${{ inputs.arm64_tag }}
+        
+        docker manifest annotate ${{ inputs.repository }}:${{ inputs.tag }} \
+          ${{ inputs.repository }}:${{ inputs.x64_tag }} --arch amd64
+        
+        docker manifest annotate ${{ inputs.repository }}:${{ inputs.tag }} \
+          ${{ inputs.repository }}:${{ inputs.arm64_tag }} --arch arm
 
         docker manifest push ${{ inputs.repository }}:${{ inputs.tag }}
 
