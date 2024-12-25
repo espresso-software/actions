@@ -50,7 +50,7 @@ runs:
           args_string="$args_string --limit ${{ inputs.hosts }}"
         fi
         if [ -n "${{ inputs.vars }}" ]; then
-          args_string="$args_string --extra-vars ${{ inputs.vars }}"
+          args_string="$args_string --extra-vars \"${{ inputs.vars }}\""
         fi
         if [ "${{ inputs.with_vault }}" = "true" ]; then
           args_string="$args_string --vault-password-file .vault_password"
