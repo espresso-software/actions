@@ -31,6 +31,10 @@ inputs:
     description: 'Build directory'
     required: false
     default: '.'
+  skip_cleanup:
+    description: 'Skip cleanup'
+    required: false
+    default: 'false'
 runs:
   using: 'composite'
   steps:
@@ -70,7 +74,7 @@ runs:
     
     - name: Docker image cleanup
       shell: bash
-      if: steps.build.conclusion == 'success'
+      if: steps.build.conclusion == 'success' || inputs.skip_cleanup == 'true'
       run: |
         docker rmi ${{ inputs.repository }}:${{ inputs.tag }}
         docker rmi ${{ inputs.repository }}:${{ inputs.custom_latest }} || true
