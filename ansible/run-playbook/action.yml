@@ -44,17 +44,22 @@ runs:
       run: |
         args_string=""
         if [ -n "${{ inputs.tags }}" ]; then
-          args_string="$args_string --tags ${{ inputs.tags }}"
+          args_string="$args_string -t ${{ inputs.tags }}"
         fi
         if [ -n "${{ inputs.hosts }}" ]; then
-          args_string="$args_string --limit ${{ inputs.hosts }}"
+          args_string="$args_string -l {{ inputs.hosts }}"
         fi
         if [ -n "${{ inputs.vars }}" ]; then
-          args_string="$args_string --extra-vars \"${{ inputs.vars }}\""
+          IFS=' ' read -r -a vars <<< "${{ inputs.vars }}"
+          for var in "${vars[@]}"; do
+            args_string="$args_string -e $var"
+          done
         fi
         if [ "${{ inputs.with_vault }}" = "true" ]; then
           args_string="$args_string --vault-password-file .vault_password"
         fi
+
+        echo "additional args: $args_string"
 
         ansible-playbook \
           -i ${{ inputs.inventory_path }} \
