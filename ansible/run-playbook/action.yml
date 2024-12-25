@@ -47,7 +47,7 @@ runs:
           args_string="$args_string -t ${{ inputs.tags }}"
         fi
         if [ -n "${{ inputs.hosts }}" ]; then
-          args_string="$args_string -l {{ inputs.hosts }}"
+          args_string="$args_string -l ${{ inputs.hosts }}"
         fi
         if [ -n "${{ inputs.vars }}" ]; then
           IFS=' ' read -r -a vars <<< "${{ inputs.vars }}"
