@@ -8,47 +8,51 @@ inputs:
     description: Docker Tag
     required: true
   latest:
-    description: 'Push latest tag'
+    description: "Push latest tag"
     required: false
-    default: 'false'
+    default: "false"
   custom_latest:
-    description: 'Custom latest tag'
+    description: "Custom latest tag"
     required: false
-    default: 'latest'
+    default: "latest"
   use_cache:
-    description: 'Use cache'
+    description: "Use cache"
     required: false
-    default: 'false'
+    default: "false"
   build_args:
-    description: 'Build arguments'
+    description: "Build arguments"
     required: false
-    default: ''
+    default: ""
   dockerfile:
-    description: 'Dockerfile'
+    description: "Dockerfile"
     required: false
-    default: 'Dockerfile'
+    default: "Dockerfile"
   build_dir:
-    description: 'Build directory'
+    description: "Build directory"
     required: false
-    default: '.'
+    default: "."
   skip_cleanup:
-    description: 'Skip cleanup'
+    description: "Skip cleanup"
     required: false
-    default: 'false'
+    default: "false"
+  http_proxy:
+    description: "HTTP Proxy"
+    required: false
+    default: "http://10.25.206.0:80"
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
     - name: Docker login
       shell: bash
       id: login
       run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-    
+
     - name: Docker build
       id: build
       shell: bash
       run: |
         no_cache=''
-        
+
         if [ "${{ inputs.use_cache }}" = "false" ]; then
           no_cache='--no-cache'
         fi
@@ -58,6 +62,7 @@ runs:
         docker build \
           --tag ${{ inputs.repository }}:${{ inputs.tag }} \
           --file ${{ inputs.dockerfile }} \
+          --build-arg HTTP_PROXY:${{ inputs.http_proxy }} \
           ${{ inputs.build_args }} \
           $no_cache \
           .
@@ -71,16 +76,15 @@ runs:
           docker tag ${{ inputs.repository }}:${{ inputs.tag }} ${{ inputs.repository }}:${{ inputs.custom_latest }}
           docker push ${{ inputs.repository }}:${{ inputs.custom_latest }}
         fi
-    
+
     - name: Docker image cleanup
       shell: bash
       if: steps.build.conclusion == 'success' || inputs.skip_cleanup == 'true'
       run: |
         docker rmi ${{ inputs.repository }}:${{ inputs.tag }}
         docker rmi ${{ inputs.repository }}:${{ inputs.custom_latest }} || true
-    
+
     - name: Docker logout
       shell: bash
       if: steps.login.conclusion == 'success'
       run: docker logout
-  
