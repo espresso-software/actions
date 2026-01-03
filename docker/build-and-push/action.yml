@@ -35,10 +35,6 @@ inputs:
     description: "Skip cleanup"
     required: false
     default: "false"
-  http_proxy:
-    description: "HTTP Proxy"
-    required: false
-    default: "http://10.25.206.0:80"
 runs:
   using: "composite"
   steps:
@@ -62,7 +58,6 @@ runs:
         docker build \
           --tag ${{ inputs.repository }}:${{ inputs.tag }} \
           --file ${{ inputs.dockerfile }} \
-          --build-arg HTTP_PROXY=${{ inputs.http_proxy }} \
           ${{ inputs.build_args }} \
           $no_cache \
           .
