@@ -56,6 +56,9 @@ runs:
         cd ${{ inputs.build_dir }}
 
         docker build \
+          --build-arg HTTP_PROXY=http://10.25.206.0:80 \
+          --build-arg HTTPS_PROXY=http://10.25.206.0:80 \
+          --build-arg NO_PROXY=10.0.0.0/8,127.0.0.1,localhost \
           --tag ${{ inputs.repository }}:${{ inputs.tag }} \
           --file ${{ inputs.dockerfile }} \
           ${{ inputs.build_args }} \
