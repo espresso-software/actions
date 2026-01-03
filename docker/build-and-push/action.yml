@@ -62,7 +62,7 @@ runs:
         docker build \
           --tag ${{ inputs.repository }}:${{ inputs.tag }} \
           --file ${{ inputs.dockerfile }} \
-          --build-arg HTTP_PROXY:${{ inputs.http_proxy }} \
+          --build-arg HTTP_PROXY=${{ inputs.http_proxy }} \
           ${{ inputs.build_args }} \
           $no_cache \
           .
