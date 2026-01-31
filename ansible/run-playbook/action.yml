@@ -65,7 +65,7 @@ runs:
           -i inventory/hosts.yml \
           -i ${{ inputs.inventory_path }} \
           ${{ inputs.debug_level }} $args_string \
-          playbook ${{ inputs.playbook_path }}
+          ${{ inputs.playbook_path }}
           
     
     - name: Remove vault password file
