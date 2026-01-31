@@ -64,9 +64,9 @@ runs:
         ansible-playbook \
           -i inventory/hosts.yml
           -i ${{ inputs.inventory_path }} \
-          ${{ inputs.debug_level }} \
-          ${{ inputs.playbook_path }} \
-          $args_string
+          ${{ inputs.debug_level }} $args_string \
+          playbook ${{ inputs.playbook_path }}
+          
     
     - name: Remove vault password file
       shell: bash
