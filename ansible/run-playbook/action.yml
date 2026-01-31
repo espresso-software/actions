@@ -7,7 +7,7 @@ inputs:
   inventory_path:
     description: 'Path to the inventory file'
     required: false
-    default: 'inventory/hosts.ini'
+    default: 'inventory/hosts.yml'
   with_vault:
     description: 'use vault'
     required: false
@@ -62,6 +62,7 @@ runs:
         echo "additional args: $args_string"
 
         ansible-playbook \
+          -i inventory/hosts.yml
           -i ${{ inputs.inventory_path }} \
           ${{ inputs.debug_level }} \
           ${{ inputs.playbook_path }} \
