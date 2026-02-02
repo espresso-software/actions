@@ -7,6 +7,10 @@ inputs:
   tag:
     description: Docker Tag
     required: true
+  platform:
+    description: "Target platform (e.g., linux/amd64, linux/arm64)"
+    required: true
+    default: ""
   latest:
     description: "Push latest tag"
     required: false
@@ -68,11 +72,11 @@ runs:
     - name: Docker push
       shell: bash
       run: |
-        docker push ${{ inputs.repository }}:${{ inputs.tag }}
+        docker push ${{ inputs.repository }}:${{ inputs.tag }} --platform ${{ inputs.platform }}
 
         if [ "${{ inputs.latest }}" = "true" ]; then
           docker tag ${{ inputs.repository }}:${{ inputs.tag }} ${{ inputs.repository }}:${{ inputs.custom_latest }}
-          docker push ${{ inputs.repository }}:${{ inputs.custom_latest }}
+          docker push ${{ inputs.repository }}:${{ inputs.custom_latest }} --platform ${{ inputs.platform }}
         fi
 
     - name: Docker image cleanup
